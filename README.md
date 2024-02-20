@@ -3,6 +3,8 @@
 api for twitter clone in (ts, express, mongodb)
 > work going on please consider contributing.
 
+******
+
 1. **User Management:**
    - `/register`: Allow users to register for a new account.
    - `/login`: Authenticate users and generate access tokens.
