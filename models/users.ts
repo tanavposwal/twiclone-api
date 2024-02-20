@@ -22,14 +22,8 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'default-profile-picture.jpg'
     },
-    followers: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' // Reference to other users who are following this user
-    }],
-    following: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User' // Reference to other users whom this user is following
-    }],
+    followers: [String],
+    following: [String],
     createdAt: {
         type: Date,
         default: Date.now

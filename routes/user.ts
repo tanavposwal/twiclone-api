@@ -109,8 +109,65 @@ router.get('/:username', async (req: Request, res: Response) => {
   }
 })
 
-// TODO: endpoint for follow, unfollow, view followers, following
-// (/username/follow, /username/unfollow, /username/followers, /username/following)
+router.get('/:username/follow', authenticateJwt, async (req: Request, res: Response) => {
+  const userName: any = req.params.username;
+  // who wants to follow
+  const followerUserName: any = req.headers["userName"]
+
+  try {
+    const user1 = await User.findOne({ username: userName });
+    const user2 = await User.findOne({ username: followerUserName });
+    user1?.followers.push(followerUserName)
+    user2?.following.push(userName)
+    await user1?.save()
+    await user2?.save()
+    res.json({ success: true, msg: "Following now." });
+  } catch (error) {
+    res.json({ success: false, msg: error });
+  }
+})
+
+router.get('/:username/unfollow', authenticateJwt, async (req: Request, res: Response) => {
+  const userName: any = req.params.username;
+  // who wants to unfollow
+  const followerUserName: any = req.headers["userName"]
+
+  try {
+    const user1 = await User.findOne({ username: userName });
+    const user2 = await User.findOne({ username: followerUserName });
+    User.updateOne(
+      { "username": userName },
+      { $pull: { "followers": followerUserName } }
+    )
+    User.updateOne(
+      { "username": followerUserName },
+      { $pull: { "following": userName } }
+    )
+    res.json({ success: true, msg: "Following removed." });
+  } catch (error) {
+    res.json({ success: false, msg: error });
+  }
+})
+
+router.get('/:username/followers', authenticateJwt, async (req: Request, res: Response) => {
+  const userName: any = req.params.username;
+  const user = await User.findOne({ username: userName });
+  if (user) {
+    res.json({ success: true, follower: user.followers })
+  } else {
+    res.json({ success: false, msg: "Error." })
+  }
+})
+
+router.get('/:username/following', authenticateJwt, async (req: Request, res: Response) => {
+  const userName: any = req.params.username;
+  const user = await User.findOne({ username: userName });
+  if (user) {
+    res.json({ success: true, following: user.following })
+  } else {
+    res.json({ success: false, msg: "Error." })
+  }
+})
 
 // TODO: endpoint for searching use algolia
 // (/query)
