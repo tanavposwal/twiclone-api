@@ -4,8 +4,11 @@ import { authenticateJwt } from '../jwt/auth';
 import ShortUniqueId from "short-unique-id"
 const router: Router = express.Router();
 
+// TODO: a endpoint to view all post
+// (/)
+
 // create new post
-router.post('/new', authenticateJwt, (req: Request, res: Response) => {
+router.post('/create', authenticateJwt, (req: Request, res: Response) => {
     const { content, image } = req.body;
     // TODO: zod
     const authorID = req.headers["userId"];
@@ -32,8 +35,11 @@ router.get('/:hash', async (req: Request, res: Response) => {
     }
 });
 
+// TODO: make endpoint to edit and delete post
+// (/hash/edit, /hash/delete)
+
 // comment on saved post
-router.post('/comment/:hash', authenticateJwt, async (req: Request, res: Response) => {
+router.post('/:hash/comments/create', authenticateJwt, async (req: Request, res: Response) => {
   const { content } = req.body;
   // TODO: zod
   const userName = req.headers["userName"]
@@ -48,8 +54,11 @@ router.post('/comment/:hash', authenticateJwt, async (req: Request, res: Respons
   }
 });
 
+// TODO: endpoints to view all comments, edit comment, delete comment
+// (/comment/edit, /comment/delete)
+
 // like a saved post
-router.get('/like/:hash', authenticateJwt, async (req: Request, res: Response) => {
+router.get('/:hash/like', authenticateJwt, async (req: Request, res: Response) => {
   const blogId: string = req.params.hash;
   const userName: any = req.headers["userName"]
   // FIXME: a bug of types userName has types (string, string[], undefined)
@@ -64,6 +73,10 @@ router.get('/like/:hash', authenticateJwt, async (req: Request, res: Response) =
   }
 });
 
-// TODO: make a endpoint for editing post
+// TODO: endpoint to view all likes, feat dislike
+// (/hash/likes, /hash/dislike)
+
+// TODO: endpoint for searching use algolia
+// (/query)
 
 export default router;

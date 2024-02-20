@@ -37,7 +37,7 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // create a account
-router.post('/signup', async (req: Request, res: Response) => {
+router.post('/register', async (req: Request, res: Response) => {
     let parsedInput = SignUpSchema.safeParse(req.body)
     if (!parsedInput.success) {
       return res.status(403).json({
@@ -75,7 +75,7 @@ const EditSchema = z.object({
 });
 
 // edit profile
-router.post('/me/profile', authenticateJwt, async (req: Request, res: Response) => {
+router.post('/me/edit', authenticateJwt, async (req: Request, res: Response) => {
   let parsedInput = EditSchema.safeParse(req.body)
   if (!parsedInput.success) {
     return res.status(403).json({
@@ -109,9 +109,11 @@ router.get('/:username', async (req: Request, res: Response) => {
   }
 })
 
-// TODO: make endpoint for following (/me/follow/:username), changing profile setting
+// TODO: endpoint for follow, unfollow, view followers, following
+// (/username/follow, /username/unfollow, /username/followers, /username/following)
 
-
+// TODO: endpoint for searching use algolia
+// (/query)
 
 
 export default router;

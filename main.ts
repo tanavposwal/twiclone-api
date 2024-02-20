@@ -21,7 +21,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.use('/user', userRoutes)
-app.use('/blog', blogRoutes)
+app.use('/post', blogRoutes)
 
 // Start the Express server
 app.listen(port, () => {
