@@ -40,7 +40,10 @@ const postSchema = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  image: [String],
+  image: {
+    type: String,
+    default: "",
+  },
 });
 
 export const Post = mongoose.model("Post", postSchema);

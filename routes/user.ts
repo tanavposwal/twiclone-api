@@ -62,7 +62,15 @@ router.get('/me', authenticateJwt, async (req: Request, res: Response) => {
     const userId = req.headers["userId"];
     const user = await User.findOne({ _id: userId });
     if (user) {
-      res.json({ user });
+      res.json({ user: {
+        username: user.username,
+        name: user.displayName,
+        bio: user.bio,
+        dp: user.profilePicture,
+        followers: user.followers.length,
+        following: user.following.length,
+        since: user.createdAt
+      } });
     } else {
       res.status(403).json({ message: 'User not logged in' });
     }
@@ -99,17 +107,25 @@ router.post('/me/edit', authenticateJwt, async (req: Request, res: Response) => 
 })
 
 // view others profile
-router.get('/:username', async (req: Request, res: Response) => {
+router.get('/:username', authenticateJwt, async (req: Request, res: Response) => {
   const userName: string = req.params.username;
   const user = await User.findOne({ username: userName });
   if (user) {
-    res.json({ user });
+    res.json({ user: {
+      username: user.username,
+      name: user.displayName,
+      bio: user.bio,
+      dp: user.profilePicture,
+      followers: user.followers.length,
+      following: user.following.length,
+      since: user.createdAt
+    } });
   } else {
     res.status(404).json({ message: 'User not found' });
   }
 })
 
-router.get('/:username/follow', authenticateJwt, async (req: Request, res: Response) => {
+router.post('/:username/follow', authenticateJwt, async (req: Request, res: Response) => {
   const userName: any = req.params.username;
   // who wants to follow
   const followerUserName: any = req.headers["userName"]
@@ -127,7 +143,7 @@ router.get('/:username/follow', authenticateJwt, async (req: Request, res: Respo
   }
 })
 
-router.get('/:username/unfollow', authenticateJwt, async (req: Request, res: Response) => {
+router.post('/:username/unfollow', authenticateJwt, async (req: Request, res: Response) => {
   const userName: any = req.params.username;
   // who wants to unfollow
   const followerUserName: any = req.headers["userName"]
