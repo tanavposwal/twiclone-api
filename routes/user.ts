@@ -30,9 +30,9 @@ router.post('/login', async (req: Request, res: Response) => {
     const user = await User.findOne({ username, password: hashPassword(password) });
     if (user) {
       const token = signToken({ id: user._id, username: user.username })
-      res.json({ message: 'Logged in successfully', token });
+      res.json({ success: true, msg: 'Logged in successfully', token });
     } else {
-      res.status(403).json({ message: 'Invalid username or password' });
+      res.status(403).json({ success: false, msg: 'Invalid username or password' });
     }
 });
 
@@ -48,12 +48,12 @@ router.post('/register', async (req: Request, res: Response) => {
     
     const user = await User.findOne({ username });
     if (user) {
-      res.status(403).json({ message: 'User already exists' });
+      res.status(403).json({ success: false, msg: 'User already exists' });
     } else {
       const newUser = new User({ username, password: hashPassword(password), displayName });
       await newUser.save();
       const token = signToken({ id: newUser._id, username: newUser.username })
-      res.json({ message: 'User created successfully', token });
+      res.json({ success: true, msg: 'User created and logged in successfully', token });
     }
 });
 
@@ -62,7 +62,7 @@ router.get('/me', authenticateJwt, async (req: Request, res: Response) => {
     const userId = req.headers["userId"];
     const user = await User.findOne({ _id: userId });
     if (user) {
-      res.json({ user: {
+      res.json({ success: true, user: {
         username: user.username,
         name: user.displayName,
         bio: user.bio,
@@ -72,7 +72,7 @@ router.get('/me', authenticateJwt, async (req: Request, res: Response) => {
         since: user.createdAt
       } });
     } else {
-      res.status(403).json({ message: 'User not logged in' });
+      res.status(403).json({ success: false, msg: 'User not logged in' });
     }
 })
 
@@ -100,9 +100,9 @@ router.post('/me/edit', authenticateJwt, async (req: Request, res: Response) => 
     if (profilePicture) user.profilePicture = profilePicture
 
     await user.save();
-    return res.json({ message: 'Profile updated successfully' });
+    return res.json({ success: true, msg: 'Profile updated successfully' });
   } else {
-    res.status(403).json({ message: 'User not logged in' });
+    res.status(403).json({ success: false, msg: 'User not logged in' });
   }
 })
 
@@ -111,7 +111,7 @@ router.get('/:username', authenticateJwt, async (req: Request, res: Response) =>
   const userName: string = req.params.username;
   const user = await User.findOne({ username: userName });
   if (user) {
-    res.json({ user: {
+    res.json({ success: false, user: {
       username: user.username,
       name: user.displayName,
       bio: user.bio,
@@ -121,7 +121,7 @@ router.get('/:username', authenticateJwt, async (req: Request, res: Response) =>
       since: user.createdAt
     } });
   } else {
-    res.status(404).json({ message: 'User not found' });
+    res.status(404).json({ success: false, msg: 'User not found' });
   }
 })
 
@@ -137,9 +137,9 @@ router.post('/:username/follow', authenticateJwt, async (req: Request, res: Resp
     user2?.following.push(userName)
     await user1?.save()
     await user2?.save()
-    res.json({ success: true, msg: "Following now." });
+    res.json({ success: true, msg: "Following now" });
   } catch (error) {
-    res.json({ success: false, msg: error });
+    res.json({ success: false, msg: "Error" });
   }
 })
 
@@ -159,9 +159,9 @@ router.post('/:username/unfollow', authenticateJwt, async (req: Request, res: Re
       { "username": followerUserName },
       { $pull: { "following": userName } }
     )
-    res.json({ success: true, msg: "Following removed." });
+    res.json({ success: true, msg: "Following removed" });
   } catch (error) {
-    res.json({ success: false, msg: error });
+    res.json({ success: false, msg: "Error" });
   }
 })
 
@@ -171,7 +171,7 @@ router.get('/:username/followers', authenticateJwt, async (req: Request, res: Re
   if (user) {
     res.json({ success: true, follower: user.followers })
   } else {
-    res.json({ success: false, msg: "Error." })
+    res.json({ success: false, msg: "User not found" })
   }
 })
 
@@ -181,7 +181,7 @@ router.get('/:username/following', authenticateJwt, async (req: Request, res: Re
   if (user) {
     res.json({ success: true, following: user.following })
   } else {
-    res.json({ success: false, msg: "Error." })
+    res.json({ success: false, msg: "User not found" })
   }
 })
 

@@ -62,7 +62,7 @@ router.get("/:hash", async (req: Request, res: Response) => {
       },
     });
   } else {
-    res.json({ success: false, post });
+    res.json({ success: false, msg: "Post not found" });
   }
 });
 
@@ -76,9 +76,9 @@ router.post("/:hash/delete", authenticateJwt, async (req: Request, res: Response
   
   if (post && post.authorID == authorID) {
     await Post.findOneAndDelete({ hash: blogId });
-    res.json({ success: true, msg: "Post deleted."})
+    res.json({ success: true, msg: "Post deleted"})
   } else {
-    res.json({ success: false, msg: "Post not found or privilage denied."})
+    res.json({ success: false, msg: "Post not found or privilage denied"})
   }
 });
 
@@ -105,9 +105,9 @@ router.post("/:hash/comments/create", authenticateJwt, async (req: Request, res:
         timestamp: Date.now(),
       });
       await post.save();
-      res.json({ success: true, msg: "Posted." });
+      res.json({ success: true, msg: "Comment posted" });
     } else {
-      res.json({ success: false, msg: "Error." });
+      res.json({ success: false, msg: "Post not found" });
     }
   }
 );
@@ -122,7 +122,7 @@ router.get("/:hash/comments", authenticateJwt, async (req: Request, res: Respons
     if (post) {
       res.json({ success: true, comments: post.comments });
     } else {
-      res.json({ success: false, msg: "Error." });
+      res.json({ success: false, msg: "Post not found" });
     }
   }
 );
@@ -135,9 +135,9 @@ router.get("/:hash/like", authenticateJwt, async (req: Request, res: Response) =
     if (post) {
       post.likes.push(userName);
       await post.save();
-      res.json({ success: true, msg: "Liked." });
+      res.json({ success: true, msg: "Liked" });
     } else {
-      res.json({ success: false, msg: "Error." });
+      res.json({ success: false, msg: "Post not found" });
     }
   }
 );
@@ -148,7 +148,7 @@ router.get("/:hash/likes", authenticateJwt, async (req: Request, res: Response) 
     if (post) {
       res.json({ success: true, likes: post.likes });
     } else {
-      res.json({ success: false, msg: "Error." });
+      res.json({ success: false, msg: "Post not found" });
     }
   }
 );
@@ -158,9 +158,9 @@ router.get("/:hash/dislike",authenticateJwt, async (req: Request, res: Response)
     const userName: any = req.headers["userName"];
     try {
       Post.updateOne({ hash: blogId }, { $pull: { likes: userName } });
-      res.json({ success: true, msg: "Disliked." });
+      res.json({ success: true, msg: "Post disliked" });
     } catch (error) {
-      res.json({ success: false, msg: error });
+      res.json({ success: false, msg: "Post not found" });
     }
   }
 );
