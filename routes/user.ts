@@ -30,7 +30,8 @@ router.post('/login', async (req: Request, res: Response) => {
     const user = await User.findOne({ username, password: hashPassword(password) });
     if (user) {
       const token = signToken({ id: user._id, username: user.username })
-      res.json({ success: true, msg: 'Logged in successfully', token });
+      res.cookie('token', token)
+      res.json({ success: true, msg: 'Logged in successfully' });
     } else {
       res.status(403).json({ success: false, msg: 'Invalid username or password' });
     }
@@ -53,7 +54,8 @@ router.post('/register', async (req: Request, res: Response) => {
       const newUser = new User({ username, password: hashPassword(password), displayName });
       await newUser.save();
       const token = signToken({ id: newUser._id, username: newUser.username })
-      res.json({ success: true, msg: 'User created and logged in successfully', token });
+      res.cookie('token', token)
+      res.json({ success: true, msg: 'User created and logged in successfully' });
     }
 });
 

@@ -3,10 +3,9 @@ import jwt from 'jsonwebtoken';
 export const SECRET = 'SECr3t';
 
 export const authenticateJwt = (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization;
+  const token: string = req.cookies.token;
 
-  if (authHeader) {
-    const token = authHeader.split(' ')[1];
+  if (token) {
     jwt.verify(token, SECRET, (err, payload) => {
       if (err) {
         return res.sendStatus(403);
