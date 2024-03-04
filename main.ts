@@ -6,14 +6,16 @@ require("dotenv").config();
 const mongodbUrl = process.env.MONGODB_URL ?? "your url here";
 mongoose.connect(mongodbUrl);
 
+const app = express();
+const port = 3001
+
+app.use(cors({
+  origin: 'http://localhost:3000'
+}));
+app.use(express.json());
+
 import blogRoutes from "./routes/blog";
 import userRoutes from "./routes/user";
-
-const app = express();
-const port = 3000;
-
-app.use(cors());
-app.use(express.json());
 
 // Define a route handler for the root path
 app.get("/", (req: Request, res: Response) => {

@@ -25,12 +25,12 @@ router.post("/create", authenticateJwt, (req: Request, res: Response) => {
     });
   }
   const { content, image } = parsedInput.data;
-  const authorID = req.headers["userId"];
+  const authorName = req.headers["userName"];
   const { randomUUID } = new ShortUniqueId({ length: 10 });
   const newPost = new Post({
     content,
     image,
-    authorID,
+    authorName,
     hash: randomUUID(),
     date: Date.now(),
   });
@@ -52,7 +52,7 @@ router.get("/:hash", async (req: Request, res: Response) => {
     res.json({
       success: true,
       post: {
-        author: post.authorID,
+        author: post.username,
         content: post.content,
         time: post.timestamp,
         likes: post.likes.length,
@@ -71,10 +71,10 @@ router.get("/:hash", async (req: Request, res: Response) => {
 
 router.post("/:hash/delete", authenticateJwt, async (req: Request, res: Response) => {
   const blogId: string = req.params.hash;
-  const authorID: any = req.headers["userId"];
+  const authorName: any = req.headers["userName"];
   const post = await Post.findOne({ hash: blogId });
   
-  if (post && post.authorID == authorID) {
+  if (post && post.username == authorName) {
     await Post.findOneAndDelete({ hash: blogId });
     res.json({ success: true, msg: "Post deleted"})
   } else {

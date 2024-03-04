@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
-import { string } from "zod";
 
 const postSchema = new mongoose.Schema({
   hash: {
     type: String,
     required: true,
   },
-  authorID: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
+  username: {
+    type: String,
     required: true,
   },
   content: {
