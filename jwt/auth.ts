@@ -7,7 +7,7 @@ export const authenticateJwt = (req: Request, res: Response, next: NextFunction)
 
   let token;
   if (authHeader) {
-    token = authHeader.split(' ')[1];
+    token = authHeader;
   }
 
   if (token != undefined) {

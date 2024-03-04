@@ -107,11 +107,11 @@ router.post('/me/edit', authenticateJwt, async (req: Request, res: Response) => 
 })
 
 // view others profile
-router.get('/id/:username', authenticateJwt, async (req: Request, res: Response) => {
+router.get('/id/:username', async (req: Request, res: Response) => {
   const userName: string = req.params.username;
   const user = await User.findOne({ username: userName });
   if (user) {
-    res.json({ success: false, user: {
+    res.json({ success: true, user: {
       username: user.username,
       name: user.displayName,
       bio: user.bio,
