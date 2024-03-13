@@ -1,5 +1,5 @@
 import express, { Request, Response, Router } from "express";
-import { z } from 'zod';
+import { z } from "zod";
 import { Post } from "../models/post";
 import { authenticateJwt } from "../jwt/auth";
 import ShortUniqueId from "short-unique-id";
@@ -13,15 +13,15 @@ router.get("/", async (req: Request, res: Response) => {
 
 const PostSchema = z.object({
   content: z.string().max(280),
-  image: z.string().url()
+  image: z.string().url(),
 });
 
 // create new post
 router.post("/create", authenticateJwt, (req: Request, res: Response) => {
-  let parsedInput = PostSchema.safeParse(req.body)
+  let parsedInput = PostSchema.safeParse(req.body);
   if (!parsedInput.success) {
     return res.status(403).json({
-      msg: "error"
+      msg: "error",
     });
   }
   const { content, image } = parsedInput.data;
@@ -30,7 +30,7 @@ router.post("/create", authenticateJwt, (req: Request, res: Response) => {
   const newPost = new Post({
     content,
     image,
-    authorName,
+    username: authorName,
     hash: randomUUID(),
     date: Date.now(),
   });
@@ -39,7 +39,7 @@ router.post("/create", authenticateJwt, (req: Request, res: Response) => {
     .then(() => {
       res.json({ success: true, msg: "Created post" });
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       res.json({ success: false, msg: "Failed to create new post", err });
     });
 });
@@ -69,29 +69,36 @@ router.get("/:hash", async (req: Request, res: Response) => {
 // TODO: make endpoint to edit post
 // (/hash/edit)
 
-router.post("/:hash/delete", authenticateJwt, async (req: Request, res: Response) => {
-  const blogId: string = req.params.hash;
-  const authorName: any = req.headers["userName"];
-  const post = await Post.findOne({ hash: blogId });
-  
-  if (post && post.username == authorName) {
-    await Post.findOneAndDelete({ hash: blogId });
-    res.json({ success: true, msg: "Post deleted"})
-  } else {
-    res.json({ success: false, msg: "Post not found or privilage denied"})
+router.post(
+  "/:hash/delete",
+  authenticateJwt,
+  async (req: Request, res: Response) => {
+    const blogId: string = req.params.hash;
+    const authorName: any = req.headers["userName"];
+    const post = await Post.findOne({ hash: blogId });
+
+    if (post && post.username == authorName) {
+      await Post.findOneAndDelete({ hash: blogId });
+      res.json({ success: true, msg: "Post deleted" });
+    } else {
+      res.json({ success: false, msg: "Post not found or privilage denied" });
+    }
   }
-});
+);
 
 const CommentSchema = z.object({
   content: z.string().max(100),
 });
 
 // comment on saved post
-router.post("/:hash/comments/create", authenticateJwt, async (req: Request, res: Response) => {
-    let parsedInput = CommentSchema.safeParse(req.body)
+router.post(
+  "/:hash/comments/create",
+  authenticateJwt,
+  async (req: Request, res: Response) => {
+    let parsedInput = CommentSchema.safeParse(req.body);
     if (!parsedInput.success) {
       return res.status(403).json({
-        msg: "error"
+        msg: "error",
       });
     }
     const { content } = parsedInput.data;
@@ -115,7 +122,10 @@ router.post("/:hash/comments/create", authenticateJwt, async (req: Request, res:
 // TODO: endpoints to edit comment, delete comment
 // (/comment/edit, /comment/delete)
 
-router.get("/:hash/comments", authenticateJwt, async (req: Request, res: Response) => {
+router.get(
+  "/:hash/comments",
+  authenticateJwt,
+  async (req: Request, res: Response) => {
     const blogId: string = req.params.hash;
 
     const post = await Post.findOne({ hash: blogId });
@@ -127,40 +137,27 @@ router.get("/:hash/comments", authenticateJwt, async (req: Request, res: Respons
   }
 );
 
-// like a saved post
-router.get("/:hash/like", authenticateJwt, async (req: Request, res: Response) => {
+// like or dislike a saved post
+router.get(
+  "/:hash/like",
+  authenticateJwt,
+  async (req: Request, res: Response) => {
     const blogId: string = req.params.hash;
     const userName: any = req.headers["userName"];
     const post = await Post.findOne({ hash: blogId });
+    
     if (post) {
-      post.likes.push(userName);
-      await post.save();
-      res.json({ success: true, msg: "Liked" });
-    } else {
-      res.json({ success: false, msg: "Post not found" });
-    }
-  }
-);
+      const userLikedIndex = post.likes.indexOf(userName);
 
-router.get("/:hash/likes", authenticateJwt, async (req: Request, res: Response) => {
-    const blogId: string = req.params.hash;
-    const post = await Post.findOne({ hash: blogId });
-    if (post) {
-      res.json({ success: true, likes: post.likes });
-    } else {
-      res.json({ success: false, msg: "Post not found" });
-    }
-  }
-);
-
-router.get("/:hash/dislike",authenticateJwt, async (req: Request, res: Response) => {
-    const blogId: string = req.params.hash;
-    const userName: any = req.headers["userName"];
-    try {
-      Post.updateOne({ hash: blogId }, { $pull: { likes: userName } });
-      res.json({ success: true, msg: "Post disliked" });
-    } catch (error) {
-      res.json({ success: false, msg: "Post not found" });
+      if (userLikedIndex === -1) {
+        post.likes.push(userName);
+        await post.save()
+        res.json({ success: true, msg: "Post liked" });
+      } else {
+        post.likes.splice(userLikedIndex, 1);
+        await post.save()
+        res.json({ success: true, msg: "Post disliked" });
+      }
     }
   }
 );

@@ -69,7 +69,8 @@ router.get('/me', authenticateJwt, async (req: Request, res: Response) => {
         dp: user.profilePicture,
         followers: user.followers.length,
         following: user.following.length,
-        since: user.createdAt
+        since: user.createdAt,
+        verified: user.verified
       } });
     } else {
       res.status(403).json({ success: false, msg: 'User not logged in' });
@@ -118,23 +119,24 @@ router.get('/id/:username', async (req: Request, res: Response) => {
       dp: user.profilePicture,
       followers: user.followers.length,
       following: user.following.length,
-      since: user.createdAt
+      since: user.createdAt,
+      verified: user.verified
     } });
   } else {
     res.status(404).json({ success: false, msg: 'User not found' });
   }
 })
 
-router.post('/:username/follow', authenticateJwt, async (req: Request, res: Response) => {
-  const userName: any = req.params.username;
+router.get('/:username/follow', authenticateJwt, async (req: Request, res: Response) => {
+  const userName1: any = req.params.username;
   // who wants to follow
-  const followerUserName: any = req.headers["userName"]
+  const userName2: any = req.headers["userName"]
 
   try {
-    const user1 = await User.findOne({ username: userName });
-    const user2 = await User.findOne({ username: followerUserName });
-    user1?.followers.push(followerUserName)
-    user2?.following.push(userName)
+    const user1 = await User.findOne({ username: userName1 });
+    const user2 = await User.findOne({ username: userName2 });
+    user1?.followers.push(userName2)
+    user2?.following.push(userName1)
     await user1?.save()
     await user2?.save()
     res.json({ success: true, msg: "Following now" });
@@ -143,22 +145,35 @@ router.post('/:username/follow', authenticateJwt, async (req: Request, res: Resp
   }
 })
 
-router.post('/:username/unfollow', authenticateJwt, async (req: Request, res: Response) => {
+router.get('/:username/info', async (req: Request, res: Response) => {
   const userName: any = req.params.username;
-  // who wants to unfollow
-  const followerUserName: any = req.headers["userName"]
 
   try {
-    const user1 = await User.findOne({ username: userName });
-    const user2 = await User.findOne({ username: followerUserName });
+    const user = await User.findOne({ username: userName });
+    res.json({ success: true, verified: user?.verified, image: user?.profilePicture });
+  } catch (error) {
+    res.json({ success: false, msg: "Error" });
+  }
+})
+
+router.get('/:username/unfollow', authenticateJwt, async (req: Request, res: Response) => {
+  const userName1: string = req.params.username;
+  // who wants to unfollow
+  const userName2: any = req.headers["userName"]
+
+  try {
     User.updateOne(
-      { "username": userName },
-      { $pull: { "followers": followerUserName } }
-    )
+      { "username": userName1 },
+      { $pull: { "followers": userName2 } }
+    ).catch(error => {
+      console.error('Error removing follower:', error);
+    });
     User.updateOne(
-      { "username": followerUserName },
-      { $pull: { "following": userName } }
-    )
+      { "username": userName2 },
+      { $pull: { "following": userName1 } }
+    ).catch(error => {
+      console.error('Error removing follower:', error);
+    });
     res.json({ success: true, msg: "Following removed" });
   } catch (error) {
     res.json({ success: false, msg: "Error" });
@@ -183,6 +198,22 @@ router.get('/:username/following', authenticateJwt, async (req: Request, res: Re
   } else {
     res.json({ success: false, msg: "User not found" })
   }
+})
+
+router.get('/:username/followstat', authenticateJwt, async (req: Request, res: Response) => {
+  const userName1: string = req.params.username;
+  const userName2: any = req.headers["userName"];
+  const user2 = await User.findOne({ username: userName2 });
+    
+    if (user2) {
+      const userIndex = user2.following.indexOf(userName1);
+
+      if (userIndex === -1) {
+        res.json({ success: true, present: false });
+      } else {
+        res.json({ success: true, present: true });
+      }
+    }
 })
 
 // TODO: endpoint for searching use algolia

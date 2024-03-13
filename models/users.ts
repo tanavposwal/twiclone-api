@@ -20,13 +20,17 @@ const userSchema = new mongoose.Schema({
     },
     profilePicture: {
         type: String,
-        default: 'default-profile-picture.jpg'
+        default: 'https://cdn.vectorstock.com/i/preview-1x/71/90/blank-avatar-photo-icon-design-vector-30257190.jpg'
     },
     followers: [String],
     following: [String],
     createdAt: {
         type: Date,
         default: Date.now
+    },
+    verified: {
+        type: Boolean,
+        default: false
     }
 });
 
