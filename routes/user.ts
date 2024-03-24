@@ -107,6 +107,17 @@ router.post('/me/edit', authenticateJwt, async (req: Request, res: Response) => 
   }
 })
 
+router.get('/me/info' , authenticateJwt, async (req: Request, res: Response) => {
+  const userId = req.headers["userId"];
+
+  try {
+    const user = await User.findOne({ _id: userId });
+    res.json({ success: true, verified: user?.verified, image: user?.profilePicture });
+  } catch (error) {
+    res.json({ success: false, msg: "Error" });
+  }
+})
+
 // view others profile
 router.get('/id/:username', async (req: Request, res: Response) => {
   const userName: string = req.params.username;

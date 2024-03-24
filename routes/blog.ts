@@ -7,7 +7,9 @@ const router: Router = express.Router();
 
 // retrieve all post
 router.get("/", async (req: Request, res: Response) => {
-  const post = await Post.find();
+  const projection = {content: 1, username: 1, comments: {$size: { $ifNull: ['$comments', []] }}, likes: {$size: { $ifNull: ['$likes', []] }}, timestamp: 1, hash: 1, image: 1, share: 1, _id: 0}
+
+  const post = await Post.find({}, projection);
   res.json({ success: true, post });
 });
 
