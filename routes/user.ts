@@ -64,6 +64,7 @@ router.get('/me', authenticateJwt, async (req: Request, res: Response) => {
     if (user) {
       res.json({ success: true, user: {
         username: user.username,
+        image: user.profilePicture,
         name: user.displayName,
         bio: user.bio,
         dp: user.profilePicture,
@@ -125,6 +126,7 @@ router.get('/id/:username', async (req: Request, res: Response) => {
   if (user) {
     res.json({ success: true, user: {
       username: user.username,
+      image: user.profilePicture,
       name: user.displayName,
       bio: user.bio,
       dp: user.profilePicture,
