@@ -47,22 +47,39 @@ router.post("/create", authenticateJwt, (req: Request, res: Response) => {
 });
 
 // view saved post
-router.get("/:hash", async (req: Request, res: Response) => {
+router.get("/:hash", authenticateJwt, async (req: Request, res: Response) => {
   const blogId: string = req.params.hash;
   const post = await Post.findOne({ hash: blogId });
   if (post) {
-    res.json({
-      success: true,
-      post: {
-        author: post.username,
-        content: post.content,
-        time: post.timestamp,
-        likes: post.likes.length,
-        comments: post.comments.length,
-        shares: post.shares,
-        image: post.image,
-      },
-    });
+    if (post.likes.includes(String(req.headers["userName"]))) {
+      res.json({
+        success: true,
+        post: {
+          author: post.username,
+          content: post.content,
+          time: post.timestamp,
+          ulike: true,
+          likes: post.likes.length,
+          comments: post.comments.length,
+          shares: post.shares,
+          image: post.image,
+        },
+      });
+    } else {
+      res.json({
+        success: true,
+        post: {
+          author: post.username,
+          content: post.content,
+          time: post.timestamp,
+          ulike: false,
+          likes: post.likes.length,
+          comments: post.comments.length,
+          shares: post.shares,
+          image: post.image,
+        },
+      });
+    }
   } else {
     res.json({ success: false, msg: "Post not found" });
   }
